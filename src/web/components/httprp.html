@@ -290,7 +290,12 @@
                                     <label>Disable Requests Logging<br>
                                         <small>Disable logging for all incoming requests for this hostname</small></label>
                                 </div>
-                            </div>
+                                <br>
+                                <div class="ui checkbox" style="margin-top: 0.4em;">
+                                    <input type="checkbox" class="EnableStaticCache">
+                                    <label>Enable Static Resources Cache<br>
+                                        <small>Cache static resources (e.g., images, CSS, JS) to improve performance</small></label>
+                                </div>
                            
                         </div>
                     </div>
@@ -892,6 +897,7 @@
         let bypassGlobalTLS = $(editor).find(".BypassGlobalTLS")[0].checked;
         let disableChunkedTransferEncoding = $(editor).find(".DisableChunkedTransferEncoding")[0].checked;
         let disableLogging = $(editor).find(".DisableLogging")[0].checked;
+        let enableStaticCache = $(editor).find(".EnableStaticCache")[0].checked;
         let tags = getTagsArrayFromEndpoint(uuid);
         if (tags.length > 0){
             tags = tags.join(",");
@@ -909,6 +915,7 @@
                 "rate" :requireRateLimit,
                 "dChunkedEnc": disableChunkedTransferEncoding,
                 "dLogging": disableLogging,
+                "esc": enableStaticCache,
                 "ratenum" :rateLimit,
                 "tags": tags,
             };
@@ -1250,6 +1257,12 @@
         editor.find(".DisableLogging").off('change');
         editor.find(".DisableLogging").prop("checked", subd.DisableLogging);
         editor.find(".DisableLogging").on("change", function() {
+            saveProxyInlineEdit(uuid);
+        });
+
+        editor.find(".EnableStaticCache").off('change');
+        editor.find(".EnableStaticCache").prop("checked", subd.EnableStaticCache || false);
+        editor.find(".EnableStaticCache").on("change", function() {
             saveProxyInlineEdit(uuid);
         });
         

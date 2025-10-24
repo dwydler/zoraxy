@@ -1,6 +1,7 @@
 package staticcache
 
 import (
+	"fmt"
 	"io"
 	"mime"
 	"net/http"
@@ -50,7 +51,7 @@ func GetDefaultStaticCacheConfig(cacheFolderDir string) *StaticCacheConfig {
 		Enabled:        false,
 		Timeout:        3600,             // 1 hourt
 		MaxFileSize:    25 * 1024 * 1024, // 25 MB
-		FileExtensions: []string{".html", ".css", ".js", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".woff", ".woff2", ".ttf", ".eot"},
+		FileExtensions: []string{".png", ".jpg", ".jpeg", ".gif", ".svg", ".woff", ".woff2", ".ttf", ".eot"},
 		SkipSubpaths:   []string{},
 		CacheFileDir:   cacheFolderDir,
 	}
@@ -60,8 +61,22 @@ func (pool *StaticCacheResourcesPool) IsEnabled() bool {
 	return pool.config.Enabled
 }
 
-func (pool *StaticCacheResourcesPool) GetConfig() *StaticCacheConfig {
-	return pool.config
+func (pool *StaticCacheResourcesPool) FlushCache() error {
+	// Check if the cache folder exists
+	_ = os.MkdirAll(pool.config.CacheFileDir, 0755)
+
+	// Remove all cached files from memory and disk
+	pool.cachedFiles.Range(func(key, value interface{}) bool {
+		cachedFile, ok := value.(*StaticCachedFile)
+		if ok {
+			// Remove file from disk
+			pool.removeFileFromDisk(cachedFile.FilePath)
+		}
+		// Remove from memory
+		pool.cachedFiles.Delete(key)
+		return true
+	})
+	return nil
 }
 
 // CheckFileSizeShouldBeCached checks if the file size is within the limit to be cached
@@ -77,7 +92,7 @@ func (pool *StaticCacheResourcesPool) ShouldCacheRequest(requestPath string) boo
 
 	// Check if path should be skipped
 	for _, skipPath := range pool.config.SkipSubpaths {
-		if strings.Contains(requestPath, skipPath) {
+		if strings.HasPrefix(requestPath, skipPath) {
 			return false
 		}
 	}
@@ -90,6 +105,7 @@ func (pool *StaticCacheResourcesPool) ShouldCacheRequest(requestPath string) boo
 			break
 		}
 	}
+
 	return found
 }
 
@@ -190,6 +206,7 @@ func (pool *StaticCacheResourcesPool) ServeCachedFile(w http.ResponseWriter, cac
 	// Set cache headers
 	w.Header().Set("Cache-Control", "public, max-age=3600") // Cache for 1 hour in browser
 
+	fmt.Println("Serving cached file:", cachedFile.FilePath)
 	// Copy file content to response
 	_, err = io.Copy(w, file)
 	return err
