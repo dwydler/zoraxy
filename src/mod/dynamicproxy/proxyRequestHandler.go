@@ -204,6 +204,20 @@ func (h *ProxyHandler) hostRequest(w http.ResponseWriter, r *http.Request, targe
 		return
 	}
 
+	/* Static Cache Check */
+	if r.Method == "GET" && target.staticCacheResourcesPool != nil && target.staticCacheResourcesPool.IsEnabled() {
+		// Check if this request should be cached and if we have a cached version
+		if cachedFile, exists := target.staticCacheResourcesPool.GetCachedFile(r.URL.Path); exists {
+			// Serve from cache
+			err := target.staticCacheResourcesPool.ServeCachedFile(w, cachedFile)
+			if err == nil {
+				h.Parent.logRequest(r, true, 200, "host-cache", reqHostname, "cache", target)
+				return
+			}
+			// If serving from cache failed, continue with normal proxy flow
+		}
+	}
+
 	if r.URL != nil {
 		r.Host = r.URL.Host
 	} else {
@@ -227,6 +241,20 @@ func (h *ProxyHandler) hostRequest(w http.ResponseWriter, r *http.Request, targe
 		PermissionPolicy:             headerRewriteOptions.PermissionPolicy,
 	})
 
+	// Prepare cache callback if static caching is enabled
+	var cacheCallback func(requestPath string, contentType string, content []byte)
+	if target.staticCacheResourcesPool != nil && target.staticCacheResourcesPool.IsEnabled() {
+		// Check if this response should be cached
+		if target.staticCacheResourcesPool.ShouldCacheRequest(r.URL.Path) {
+			cacheCallback = func(requestPath string, contentType string, content []byte) {
+				// Only cache if content length is within limits
+				if target.staticCacheResourcesPool.CheckFileSizeShouldBeCached(int64(len(content))) {
+					target.staticCacheResourcesPool.StoreCachedFile(requestPath, contentType, content)
+				}
+			}
+		}
+	}
+
 	//Handle the request reverse proxy
 	statusCode, err := selectedUpstream.ServeHTTP(w, r, &dpcore.ResponseRewriteRuleSet{
 		ProxyDomain:                    selectedUpstream.OriginIpOrDomain,
@@ -241,6 +269,7 @@ func (h *ProxyHandler) hostRequest(w http.ResponseWriter, r *http.Request, targe
 		NoRemoveHopByHop:               headerRewriteOptions.DisableHopByHopHeaderRemoval,
 		Version:                        target.parent.Option.HostVersion,
 		DevelopmentMode:                target.parent.Option.DevelopmentMode,
+		CacheResponse:                  cacheCallback,
 	})
 
 	//validate the error

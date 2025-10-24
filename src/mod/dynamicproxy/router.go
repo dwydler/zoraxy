@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"imuslab.com/zoraxy/mod/dynamicproxy/dpcore"
+	"imuslab.com/zoraxy/mod/dynamicproxy/staticcache"
 	"imuslab.com/zoraxy/mod/utils"
 )
 
@@ -30,6 +31,11 @@ func (router *Router) PrepareProxyRoute(endpoint *ProxyEndpoint) (*ProxyEndpoint
 	}
 
 	endpoint.parent = router
+
+	//Initialize static cache resources pool if static cache is configured
+	if endpoint.StaticCacheConfig != nil && endpoint.StaticCacheConfig.Enabled {
+		endpoint.staticCacheResourcesPool = staticcache.NewStaticCacheResourcesPool(endpoint.StaticCacheConfig)
+	}
 
 	//Prepare proxy routing handler for each of the virtual directories
 	for _, vdir := range endpoint.VirtualDirectories {

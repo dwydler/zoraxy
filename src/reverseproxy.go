@@ -10,11 +10,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"imuslab.com/zoraxy/mod/auth"
 	"imuslab.com/zoraxy/mod/dynamicproxy"
 	"imuslab.com/zoraxy/mod/dynamicproxy/loadbalance"
 	"imuslab.com/zoraxy/mod/dynamicproxy/permissionpolicy"
 	"imuslab.com/zoraxy/mod/dynamicproxy/rewrite"
+	"imuslab.com/zoraxy/mod/dynamicproxy/staticcache"
 	"imuslab.com/zoraxy/mod/netutils"
 	"imuslab.com/zoraxy/mod/tlscert"
 	"imuslab.com/zoraxy/mod/uptime"
@@ -343,6 +345,10 @@ func ReverseProxyHandleAddEndpoint(w http.ResponseWriter, r *http.Request) {
 	}
 	tags = filteredTags
 
+	// Get a default static cache config with default cache dir
+	cacheDir := filepath.Join(TMP_FOLDER, "static_cache", uuid.New().String())
+	staticCacheConfig := staticcache.GetDefaultStaticCacheConfig(cacheDir)
+
 	var proxyEndpointCreated *dynamicproxy.ProxyEndpoint
 	switch eptype {
 	case "host":
@@ -413,10 +419,15 @@ func ReverseProxyHandleAddEndpoint(w http.ResponseWriter, r *http.Request) {
 			//Default Site
 			DefaultSiteOption: 0,
 			DefaultSiteValue:  "",
+
+			// Static Cache
+			StaticCacheConfig: staticCacheConfig,
+
 			// Rate Limit
 			RequireRateLimit: requireRateLimit,
 			RateLimit:        int64(proxyRateLimit),
 
+			// Others
 			Tags:                 tags,
 			DisableUptimeMonitor: !enableUtm,
 			DisableLogging:       disableLog,

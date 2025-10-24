@@ -22,6 +22,7 @@ import (
 	"imuslab.com/zoraxy/mod/dynamicproxy/permissionpolicy"
 	"imuslab.com/zoraxy/mod/dynamicproxy/redirection"
 	"imuslab.com/zoraxy/mod/dynamicproxy/rewrite"
+	"imuslab.com/zoraxy/mod/dynamicproxy/staticcache"
 	"imuslab.com/zoraxy/mod/geodb"
 	"imuslab.com/zoraxy/mod/info/logger"
 	"imuslab.com/zoraxy/mod/plugins"
@@ -220,9 +221,13 @@ type ProxyEndpoint struct {
 	DefaultSiteOption int    //Fallback routing logic options
 	DefaultSiteValue  string //Fallback routing target, optional
 
+	//Static Resources Caching
+	StaticCacheConfig *staticcache.StaticCacheConfig //Static cache configuration for this endpoint
+
 	//Internal Logic Elements
-	parent *Router  `json:"-"`
-	Tags   []string // Tags for the proxy endpoint
+	parent                   *Router                               `json:"-"` //Parent router
+	staticCacheResourcesPool *staticcache.StaticCacheResourcesPool `json:"-"` //Static cache resources pool
+	Tags                     []string                              // Tags for the proxy endpoint
 }
 
 /*

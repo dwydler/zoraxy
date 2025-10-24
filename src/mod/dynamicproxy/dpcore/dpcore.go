@@ -1,6 +1,7 @@
 package dpcore
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"errors"
@@ -78,6 +79,9 @@ type ResponseRewriteRuleSet struct {
 	/* System Information Payload */
 	DevelopmentMode bool   //Inject dev mode information to requests
 	Version         string //Version number of Zoraxy, use for X-Proxy-By
+
+	/* Caching Support */
+	CacheResponse func(requestPath string, contentType string, content []byte) //Callback to cache response, can be nil
 }
 
 type requestCanceler interface {
@@ -410,7 +414,29 @@ func (p *ReverseProxy) ProxyHTTP(rw http.ResponseWriter, req *http.Request, rrr 
 
 	//Get flush interval in real time and start copying the request
 	flushInterval := p.getFlushInterval(req, res)
-	p.copyResponse(rw, res.Body, flushInterval)
+
+	// Check if we need to cache this response
+	if rrr.CacheResponse != nil && res.StatusCode == 200 {
+		// Read the entire response body into memory for caching
+		bodyBytes, err := io.ReadAll(res.Body)
+		if err != nil {
+			if p.Verbal {
+				p.logf("dpcore read error during caching: %v", err)
+			}
+			// Fall back to normal copying without caching
+			p.copyResponse(rw, res.Body, flushInterval)
+		} else {
+			// Cache the response
+			contentType := res.Header.Get("Content-Type")
+			rrr.CacheResponse(req.URL.Path, contentType, bodyBytes)
+
+			// Send cached content to client
+			p.copyResponse(rw, bytes.NewReader(bodyBytes), flushInterval)
+		}
+	} else {
+		// Normal response copying without caching
+		p.copyResponse(rw, res.Body, flushInterval)
+	}
 
 	// close now, instead of defer, to populate res.Trailer
 	res.Body.Close()
