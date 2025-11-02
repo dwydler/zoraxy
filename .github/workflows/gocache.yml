@@ -46,6 +46,7 @@ jobs:
       - name: Output debug informations
         run: |
           echo "${{ steps.date.outputs.date }}"
+          echo "${{ steps.date.outputs.test1 }}"
           echo "${{ steps.date.outputs.go-build }}"
           
       # Cache go build cache, used to speedup go test
