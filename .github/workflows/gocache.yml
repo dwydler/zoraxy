@@ -24,9 +24,9 @@ jobs:
           go-version-file: ./src/go.mod
           cache: false
 
-      - name: Set Go cache date
-        shell: bash
-        run: echo "GO_CACHE_DATE=$(date +%Y-%m-%d)" >> $GITHUB_ENV
+#      - name: Set Go cache date
+#        shell: bash
+#        run: echo "GO_CACHE_DATE=$(date +%Y-%m-%d)" >> $GITHUB_ENV
       
       - name: Go Cache Paths
         id: go-cache-paths
