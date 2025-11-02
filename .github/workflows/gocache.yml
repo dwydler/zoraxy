@@ -40,7 +40,7 @@ jobs:
         id: date
         run: |
           echo "date=$(TZ='Europe/Berlin' date +'%Y%m%d')" >> $GITHUB_OUTPUT
-
+          go env GOCACHE
           echo "gobuild=$(go env GOCACHE)" >> $$GITHUB_OUTPUT
 
       - name: Output debug informations
