@@ -43,14 +43,14 @@ jobs:
           echo "date=$(TZ='Europe/Berlin' date +'%Y%m%d')" >> $GITHUB_OUTPUT
           echo "test1=$(go env GOCACHE)" >> $GITHUB_OUTPUT
           echo "go-cache=$(go env GOCACHE)" >> $$GITHUB_OUTPUT
-          echo "go-modcache=$(go env GOMODCACHE)" >> $$GITHUB_OUTPUT
+          echo "test2=$(go env GOMODCACHE)" >> $$GITHUB_OUTPUT
 
       - name: Output debug informations
         run: |
           echo "${{ steps.date.outputs.date }}"
           echo "${{ steps.date.outputs.test1 }}"
           echo "${{ steps.date.outputs.go-cache }}"
-          echo "${{ steps.date.outputs.go-modcache }}"
+          echo "${{ steps.date.outputs.test2 }}"
           
       # Cache go build cache, used to speedup go test
 #      - name: Go Build Cache
