@@ -39,6 +39,8 @@ jobs:
       - name: Get the current date
         id: date
         run: |
+          go env GOCACHE
+          go env GOMODCACHE
           echo "date=$(TZ='Europe/Berlin' date +'%Y%m%d')" >> $GITHUB_OUTPUT
           echo "test1=$(go env GOCACHE)" >> $GITHUB_OUTPUT
           echo "test2=$(go env GOMODCACHE)" >> $$GITHUB_OUTPUT
