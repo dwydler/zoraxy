@@ -28,15 +28,21 @@ jobs:
 #        shell: bash
 #        run: echo "GO_CACHE_DATE=$(date +%Y-%m-%d)" >> $GITHUB_ENV
       
-      - name: Go Cache Paths
-        id: gocachepaths
-        run: |        
-          echo "gobuild=$(go env GOCACHE)" >> $$GITHUB_OUTPUT
-          echo "go-mod=$(go env GOMODCACHE)" >> $$GITHUB_OUTPUT
+#      - name: Go Cache Paths
+#        id: gocachepaths
+#        run: |        
+#          echo "gobuild=$(go env GOCACHE)" >> $$GITHUB_OUTPUT
+#          echo "go-mod=$(go env GOMODCACHE)" >> $$GITHUB_OUTPUT
           
+
+
+      - name: Get the current date
+        id: date
+        run: echo "date=$(TZ='Europe/Berlin' date +'%Y%m%d')" >> $GITHUB_OUTPUT
+
       - name: Output debug informations
-        run: echo "${{ steps.gocachepaths.outputs.gobuild }}"
-          
+        run: echo "${{ steps.date.outputs.date }}"
+      
           
       # Cache go build cache, used to speedup go test
 #      - name: Go Build Cache
