@@ -30,15 +30,14 @@ jobs:
       
       - name: Go Cache Paths
         id: go-cache-paths
-        run: |
-          #echo "::set-output name=go-build::$(go env GOCACHE)"
-          #echo "::set-output name=go-mod::$(go env GOMODCACHE)"
-          
-          #echo "GO_CACHE_DATE=$(date +%Y-%m-%d)" >> $GITHUB_ENV
-          
+        run: |        
           echo "go-build=$(go env GOCACHE)" >> $GITHUB_ENV
           echo "go-mod=$(go env GOMODCACHE)" >> $GITHUB_ENV
 
+      - name: Output debug informations
+        run: |
+          echo ${{ steps.go-cache-paths.outputs.go-build }}
+          
       # Cache go build cache, used to speedup go test
       - name: Go Build Cache
         uses: actions/cache@v4
