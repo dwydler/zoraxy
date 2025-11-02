@@ -1,9 +1,17 @@
+---
 name: Build and push Docker image
 
-on:
-  release:
-    types: [ released, prereleased ]
+"on":
+  workflow_dispatch:
+  
+env:
+  DOCKER_ACCOUNT: wydler
+  DOCKER_REPO_TAG_CACHE_NAME: buildcache
+  DOCKER_PLATFORMS: linux/amd64,linux/arm64/v8
 
+permissions:
+  contents: read
+  
 jobs:
   setup-build-push:
     runs-on: ubuntu-latest
@@ -11,7 +19,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.release.tag_name }}
+          ref: main
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -25,36 +33,21 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Pull last image for layer reuse
-        run: |
-          docker pull docker.io/zoraxydocker/zoraxy:latest
+#      - name: Pull last image for layer reuse
+#        run: |
+#          docker pull docker.io/zoraxydocker/zoraxy:latest
       
       - name: Setup building file structure
         run: |
           cp -lr $GITHUB_WORKSPACE/src/ $GITHUB_WORKSPACE/docker/src/
 
       - name: Build and push Docker image (Release)
-        if: "!github.event.release.prerelease"
         uses: docker/build-push-action@v6
         with:
           context: ./docker
           push: true
           platforms: linux/amd64,linux/arm64
           tags: |
-            zoraxydocker/zoraxy:latest
-            zoraxydocker/zoraxy:${{ github.event.release.tag_name }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Build and push Docker image (Prerelease)
-        if: "github.event.release.prerelease"
-        uses: docker/build-push-action@v6
-        with:
-          context: ./docker
-          push: true
-          platforms: linux/amd64,linux/arm64
-          tags: |
-            zoraxydocker/zoraxy:${{ github.event.release.tag_name }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
+            wydler/test-zoraxy:latest
+          cache-from: type=registry,ref=${{ env.DOCKER_ACCOUNT }}/test-zoraxy:${{ env.DOCKER_REPO_TAG_CACHE_NAME }}
+          cache-to: type=registry,ref=${{ env.DOCKER_ACCOUNT }}/test-zoraxy:${{ env.DOCKER_REPO_TAG_CACHE_NAME }},mode=max
