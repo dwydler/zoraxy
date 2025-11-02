@@ -1,0 +1,42 @@
+---
+name: Build Go Cache
+
+"on":
+  workflow_dispatch:
+
+
+permissions:
+  contents: read
+  
+jobs:
+  setup-build-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5.0.0
+        with:
+          #ref: ${{ github.event.release.tag_name }}
+          ref: v3.2.8
+    
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: ./src/go.mod
+
+      - name: Download Go modules
+        run: go mod download
+        shell: bash
+
+      - name: Set Go cache date
+        shell: bash
+        run: echo "GO_CACHE_DATE=$(date +%Y-%m-%d)" >> $GITHUB_ENV
+        
+      - name: Cache Go dependencies and build output
+        uses: actions/cache/save@v4
+        with:
+          # Caches both the downloaded modules and the compiled build cache.
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build        
+          # Save to eg Linux-go-$hash-YYYY-MM-DD to keep the cache fresh
+          key: "${{ runner.os }}-go-${{ hashFiles('go.mod') }}-${{ env.GO_CACHE_DATE }}"
