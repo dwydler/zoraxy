@@ -55,12 +55,14 @@ jobs:
       - name: Go Build Cache
         uses: actions/cache@v4
         with:
-          path: "/home/runner/.cache/go-build"
+          #path: "/home/runner/.cache/go-build"
+          path: "./src/"
           key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
       
       # Cache go mod cache, used to speedup builds
       - name: Go Mod Cache
         uses: actions/cache@v4
         with:
-          path: "/home/runner/go/pkg/mod"
+          #path: "/home/runner/go/pkg/mod"
+          path: "./src/"
           key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}          
