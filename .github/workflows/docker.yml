@@ -3,7 +3,9 @@ name: Build and push Docker image
 
 "on":
   workflow_dispatch:
-  
+  release:
+    types: [ released, prereleased ]
+    
 env:
   DOCKER_ACCOUNT: wydler
   DOCKER_REPO: test-zoraxy
