@@ -44,6 +44,8 @@ jobs:
       - name: Create tag list for docker image
         id: tags
         run: |
+          echo "Value: ${{ github.event.release.prerelease }}"
+          
           if [[ ! -v "${{ github.event.release.prerelease }}" ]]; then
             echo "docker= ${{ env.DOCKER_ACCOUNT }}/${{ env.DOCKER_REPO }}:latest,  ${{ env.DOCKER_ACCOUNT }}/${{ env.DOCKER_REPO }}:${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
           else
