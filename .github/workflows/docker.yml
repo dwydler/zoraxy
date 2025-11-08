@@ -8,7 +8,7 @@ env:
   DOCKER_ACCOUNT: wydler
   DOCKER_REPO: test-zoraxy
   DOCKER_REPO_TAG_CACHE_NAME: buildcache
-  DOCKER_PLATFORMS: linux/amd64,linux/arm64/v8
+  DOCKER_PLATFORMS: linux/amd64,linux/arm64
 
 permissions:
   contents: read
