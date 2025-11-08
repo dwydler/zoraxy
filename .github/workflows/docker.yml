@@ -38,7 +38,16 @@ jobs:
 #      - name: Pull last image for layer reuse
 #        run: |
 #          docker pull docker.io/zoraxydocker/zoraxy:latest
-      
+
+      - name: Create tag list for docker image
+        id: tags
+        run: |
+          if [[ ! -z "${{ github.event.release.prerelease }}" ]]; then
+            echo "docker= ${{ env.DOCKER_ACCOUNT }}/${{ env.DOCKER_REPO }}:latest,  ${{ env.DOCKER_ACCOUNT }}/${{ env.DOCKER_REPO }}:${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "docker= ${{ env.DOCKER_ACCOUNT }}/${{ env.DOCKER_REPO }}:${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+          fi
+          
       - name: Setup building file structure
         run: |
           cp -lr $GITHUB_WORKSPACE/src/ $GITHUB_WORKSPACE/docker/src/
