@@ -6,6 +6,7 @@ name: Build and push Docker image
   
 env:
   DOCKER_ACCOUNT: wydler
+  DOCKER_REPO: test-zoraxy
   DOCKER_REPO_TAG_CACHE_NAME: buildcache
   DOCKER_PLATFORMS: linux/amd64,linux/arm64/v8
 
@@ -49,6 +50,6 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: |
-            wydler/test-zoraxy:latest
+            ${{ env.DOCKER_ACCOUNT }}/${{ env.DOCKER_REPO }}:latest
           cache-from: type=registry,ref=${{ env.DOCKER_ACCOUNT }}/test-zoraxy:${{ env.DOCKER_REPO_TAG_CACHE_NAME }}
           cache-to: type=registry,ref=${{ env.DOCKER_ACCOUNT }}/test-zoraxy:${{ env.DOCKER_REPO_TAG_CACHE_NAME }},mode=max
