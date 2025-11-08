@@ -50,8 +50,6 @@ jobs:
           else
             echo "docker=${{ env.DOCKER_ACCOUNT }}/${{ env.DOCKER_REPO }}:${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
           fi
-
-          echo "tags: $docker"
           
       - name: Setup building file structure
         run: |
