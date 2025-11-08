@@ -54,13 +54,12 @@ jobs:
         run: |
           cp -lr $GITHUB_WORKSPACE/src/ $GITHUB_WORKSPACE/docker/src/
 
-      - name: Build and push Docker image (Release)
+      - name: Build and push Docker image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83  # v6.18.0
         with:
           context: ./docker
           push: true
           platforms: ${{ env.DOCKER_PLATFORMS }}
-          tags: |
-            ${{ env.DOCKER_ACCOUNT }}/${{ env.DOCKER_REPO }}:latest
+          tags: ${{ steps.tags.outputs.docker }}
           cache-from: type=registry,ref=${{ env.DOCKER_ACCOUNT }}/${{ env.DOCKER_REPO }}:${{ env.DOCKER_REPO_TAG_CACHE_NAME }}
           cache-to: type=registry,ref=${{ env.DOCKER_ACCOUNT }}/${{ env.DOCKER_REPO }}:${{ env.DOCKER_REPO_TAG_CACHE_NAME }},mode=max
