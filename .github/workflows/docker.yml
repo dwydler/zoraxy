@@ -47,7 +47,7 @@ jobs:
         run: |       
           if [ ! -z "${{ github.event.release.prerelease }}" ] && [ "${{ github.event.release.prerelease }}" = true ]; then
             echo "docker=${{ env.DOCKER_ACCOUNT }}/${{ env.DOCKER_REPO }}:${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
-          elif if [ -z "${{ github.event.release.prerelease }}" ] && [ ! -z "${{ github.event.release.tag_name }}" ]; then
+          elif [ -z "${{ github.event.release.prerelease }}" ] && [ ! -z "${{ github.event.release.tag_name }}" ]; then
             echo "docker=${{ env.DOCKER_ACCOUNT }}/${{ env.DOCKER_REPO }}:${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
           else
             echo "docker=${{ env.DOCKER_ACCOUNT }}/${{ env.DOCKER_REPO }}:latest, ${{ env.DOCKER_ACCOUNT }}/${{ env.DOCKER_REPO }}:${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
