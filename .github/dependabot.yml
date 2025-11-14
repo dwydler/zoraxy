@@ -12,4 +12,4 @@ updates:
       interval: "daily"
       # day: "saturday"
       timezone: "Europe/Berlin"
-      time: "22:45"
+      time: "22:35"
